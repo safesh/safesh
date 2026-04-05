@@ -27,7 +27,7 @@ task ci          # lint + test + build
 
 ## Module path
 
-`github.com/adeshmukh/safesh` — update when GitHub org is created.
+`github.com/safesh/safesh`
 
 ## Package structure
 

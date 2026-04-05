@@ -25,7 +25,7 @@ curl -fsSL https://example.com/install.sh | safesh
 
 ```sh
 # Via go install
-go install github.com/adeshmukh/safesh/cmd/safesh@latest
+go install github.com/safesh/safesh/cmd/safesh@latest
 ```
 
 ## Usage
