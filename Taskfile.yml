@@ -86,6 +86,16 @@ tasks:
       - task: test
       - task: build
 
+  test-e2e:
+    desc: Run Docker-based end-to-end examples
+    cmds:
+      - |
+        set -e
+        for dir in examples/*/; do
+          echo "==> e2e: $dir"
+          make -C "$dir" test
+        done
+
   release:dry:
     desc: Dry-run goreleaser release
     cmds:
