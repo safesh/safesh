@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -14,6 +15,7 @@ import (
 	"github.com/safesh/safesh/internal/finding"
 	"github.com/safesh/safesh/internal/history"
 	"github.com/safesh/safesh/internal/integrity"
+	"github.com/safesh/safesh/internal/observer"
 	"github.com/safesh/safesh/internal/ui"
 )
 
@@ -34,6 +36,7 @@ func main() {
 // flags holds CLI flag values.
 type flags struct {
 	dryRun    bool
+	observe   bool
 	sha256    string
 	envVars   []string
 	noStrict  bool
@@ -64,6 +67,7 @@ Usage:
 	}
 
 	root.PersistentFlags().BoolVar(&f.dryRun, "dry-run", false, "analyse without executing")
+	root.PersistentFlags().BoolVar(&f.observe, "observe", false, "run script under strace and report observed behaviour (Linux only, requires strace)")
 	root.PersistentFlags().StringVar(&f.sha256, "sha256", "", "expected SHA-256 hash (URL mode only)")
 	root.PersistentFlags().StringArrayVar(&f.envVars, "env", nil, "pass through environment variable (repeatable)")
 	root.PersistentFlags().BoolVar(&f.noStrict, "no-strict", false, "do not inject set -euo pipefail")
@@ -92,6 +96,14 @@ func runMain(_ *cobra.Command, args []string, f *flags) error {
 	if f.explain != "" {
 		printExplanation(f.explain)
 		return nil
+	}
+
+	// --observe is Linux-only
+	if f.observe && runtime.GOOS != "linux" {
+		return fmt.Errorf("--observe is only supported on Linux (current OS: %s)", runtime.GOOS)
+	}
+	if f.observe && !observer.HasStrace() {
+		return fmt.Errorf("--observe requires strace; install it (e.g. apt install strace) and retry")
 	}
 
 	cfg, err := loadConfig(f.configPath)
@@ -163,12 +175,13 @@ func runMain(_ *cobra.Command, args []string, f *flags) error {
 	// Print findings
 	PrintFindingsToStderr(findings, useColor)
 
-	// Determine if confirmation is needed
+	// Determine if confirmation is needed.
+	// --observe mode skips confirmation — it is a safe sandbox run.
 	blockingCats := stringsToCategories(cfg.Findings.Blocking)
 	blockingFindings := analyzer.FilterByCategories(findings, blockingCats)
 
 	aborted := false
-	if len(findings) > 0 && !f.noConfirm && cfg.Defaults.ConfirmOnFindings {
+	if !f.observe && len(findings) > 0 && !f.noConfirm && cfg.Defaults.ConfirmOnFindings {
 		isInteractive := ui.IsInteractive()
 		if len(blockingFindings) > 0 || isInteractive {
 			confirmed := ui.Confirm(!isInteractive, ui.DefaultConfirmOptions())
@@ -203,6 +216,7 @@ func runMain(_ *cobra.Command, args []string, f *flags) error {
 		Hostname:       hostname,
 		User:           user,
 		DryRun:         f.dryRun,
+		Observe:        f.observe,
 		Aborted:        aborted,
 		StrictMode:     !f.noStrict && cfg.Defaults.StrictMode,
 		Checksum:       integrityResult,
@@ -219,7 +233,34 @@ func runMain(_ *cobra.Command, args []string, f *flags) error {
 		return fmt.Errorf("execution aborted by user")
 	}
 
-	// Execute
+	// --observe: run under strace and report; do not execute normally.
+	if f.observe {
+		obsOpts := observer.Options{
+			Shell:               shellPath,
+			StrictMode:          !f.noStrict && cfg.Defaults.StrictMode,
+			IsolateEnv:          cfg.Defaults.EnvironmentIsolation,
+			ExtraEnvPassthrough: append(cfg.Environment.Passthrough, f.envVars...),
+		}
+		obs, obsErr := observer.Run(fetch.Content, obsOpts)
+		if obsErr != nil {
+			_ = histWriter.Write(entry)
+			return fmt.Errorf("observe: %w", obsErr)
+		}
+		entry.Exit = &history.ExitInfo{
+			ExitCode:   obs.ExitCode,
+			DurationMS: obs.Duration.Milliseconds(),
+		}
+		_ = histWriter.Write(entry)
+
+		ui.PrintObservation(os.Stderr, obs, useColor)
+
+		if obs.ExitCode != 0 {
+			os.Exit(obs.ExitCode)
+		}
+		return nil
+	}
+
+	// Normal execute
 	opts := executor.Options{
 		Shell:               shellPath,
 		StrictMode:          !f.noStrict && cfg.Defaults.StrictMode,

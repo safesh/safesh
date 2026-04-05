@@ -10,6 +10,7 @@ import (
 	"github.com/safesh/safesh/internal/finding"
 	"github.com/safesh/safesh/internal/history"
 	"github.com/safesh/safesh/internal/integrity"
+	"github.com/safesh/safesh/internal/observer"
 )
 
 const (
@@ -100,6 +101,8 @@ func PrintEntry(w io.Writer, e *history.Entry, useColor bool) {
 	fmt.Fprintf(w, "Shell:   %s\n", m.Shell)
 
 	switch {
+	case m.Observe:
+		fmt.Fprintf(w, "Mode:    %s\n", tag(colorCyan, "observe", useColor))
 	case m.DryRun:
 		fmt.Fprintf(w, "Mode:    %s\n", tag(colorCyan, "dry-run", useColor))
 	case m.Aborted:
@@ -134,9 +137,12 @@ func PrintEntryList(w io.Writer, metas []history.Meta, useColor bool) {
 	}
 	for _, m := range metas {
 		status := ""
-		if m.DryRun {
+		switch {
+		case m.Observe:
+			status = " " + tag(colorCyan, "[observe]", useColor)
+		case m.DryRun:
 			status = " " + tag(colorCyan, "[dry-run]", useColor)
-		} else if m.Aborted {
+		case m.Aborted:
 			status = " " + tag(colorYellow, "[aborted]", useColor)
 		}
 		fmt.Fprintf(w, "%s  %s  %s%s\n",
@@ -146,6 +152,56 @@ func PrintEntryList(w io.Writer, metas []history.Meta, useColor bool) {
 			status,
 		)
 	}
+}
+
+// PrintObservation writes the structured output of a --observe run to w.
+func PrintObservation(w io.Writer, obs *observer.Observation, useColor bool) {
+	fmt.Fprintf(w, "\n%ssafesh observe:%s exit %d  (%.1fs)\n",
+		bold(useColor), colorReset,
+		obs.ExitCode,
+		obs.Duration.Seconds(),
+	)
+
+	if len(obs.Events) == 0 {
+		fmt.Fprintf(w, "  %sno syscall events recorded%s\n", dim(useColor), colorReset)
+		return
+	}
+
+	// Group by kind
+	var files, network, procs []observer.Event
+	for _, ev := range obs.Events {
+		switch ev.Kind {
+		case observer.EventFile:
+			files = append(files, ev)
+		case observer.EventNetwork:
+			network = append(network, ev)
+		case observer.EventProcess:
+			procs = append(procs, ev)
+		}
+	}
+
+	if len(procs) > 0 {
+		fmt.Fprintf(w, "\n  %s\n", tag(colorCyan, "[processes]", useColor))
+		for _, ev := range procs {
+			fmt.Fprintf(w, "    %-10s  %s\n", ev.Syscall, ev.Detail)
+		}
+	}
+
+	if len(network) > 0 {
+		fmt.Fprintf(w, "\n  %s\n", tag(colorYellow, "[network]", useColor))
+		for _, ev := range network {
+			fmt.Fprintf(w, "    %-10s  %s\n", ev.Syscall, ev.Detail)
+		}
+	}
+
+	if len(files) > 0 {
+		fmt.Fprintf(w, "\n  %s\n", tag(colorDim, "[files]", useColor))
+		for _, ev := range files {
+			fmt.Fprintf(w, "    %-10s  %s\n", ev.Syscall, ev.Detail)
+		}
+	}
+
+	fmt.Fprintln(w)
 }
 
 func tag(color, text string, useColor bool) string {
