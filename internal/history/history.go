@@ -43,6 +43,7 @@ type Meta struct {
 	Hostname        string              `json:"hostname"`
 	User            string              `json:"user"`
 	DryRun          bool                `json:"dry_run"`
+	Observe         bool                `json:"observe,omitempty"`
 	Aborted         bool                `json:"aborted"`
 	CIMode          bool                `json:"ci_mode,omitempty"`
 	StrictMode      bool                `json:"strict_mode"`
