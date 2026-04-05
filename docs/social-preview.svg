@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <!-- Background -->
+  <rect width="1280" height="640" fill="#0a0a0c"/>
+
+  <!-- Subtle grid lines for depth -->
+  <rect width="1280" height="640" fill="url(#grid)" opacity="0.04"/>
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Shield (centered vertically, left of center) -->
+  <!-- Scale up the 64x64 icon ~5x to ~320px tall, centered at x=340, y=320 -->
+  <g transform="translate(180, 80) scale(5.625)">
+    <path d="M32 6 L54 16 L54 34 C54 47 43 56 32 60 C21 56 10 47 10 34 L10 16 Z"
+          fill="#f59e0b"/>
+    <text x="32" y="42"
+          font-family="'SF Mono','JetBrains Mono','Fira Code',ui-monospace,monospace"
+          font-size="22"
+          font-weight="700"
+          text-anchor="middle"
+          fill="#0a0a0c">&gt;_</text>
+  </g>
+
+  <!-- Divider line -->
+  <line x1="560" y1="160" x2="560" y2="480" stroke="#1e1e28" stroke-width="1.5"/>
+
+  <!-- Project name -->
+  <text x="640" y="290"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="96"
+        font-weight="700"
+        fill="#ffffff"
+        letter-spacing="-2">safesh</text>
+
+  <!-- Tagline -->
+  <text x="640" y="360"
+        font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="28"
+        font-weight="400"
+        fill="#666674"
+        letter-spacing="0.5">curl | bash, done safely</text>
+
+  <!-- Bottom accent line -->
+  <rect x="640" y="410" width="120" height="3" rx="2" fill="#f59e0b"/>
+</svg>
