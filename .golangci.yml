@@ -1,0 +1,39 @@
+version: "2"
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - gosec
+    - revive
+    - gocritic
+    - nolintlint
+    - godot
+    - misspell
+    - unconvert
+    - unparam
+    - whitespace
+
+linters-settings:
+  revive:
+    rules:
+      - name: exported
+        severity: warning
+      - name: var-naming
+        severity: warning
+  gosec:
+    excludes:
+      - G304  # File path from variable — expected for executor temp files
+  godot:
+    scope: declarations
+    capital: false
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gosec
+        - errcheck
+  max-issues-per-linter: 50
+  max-same-issues: 10

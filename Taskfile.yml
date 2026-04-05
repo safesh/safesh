@@ -1,0 +1,97 @@
+version: "3"
+
+vars:
+  BINARY: safesh
+  BUILD_DIR: dist
+  GOPATH_BIN:
+    sh: go env GOPATH | tr -d '\n' && echo "/bin"
+
+env:
+  PATH: "{{.GOPATH_BIN}}:$PATH"
+  CGO_ENABLED: "0"
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the safesh binary
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - go build -ldflags="-s -w -X main.version={{.VERSION}}" -o {{.BUILD_DIR}}/{{.BINARY}} ./cmd/safesh
+    vars:
+      VERSION:
+        sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
+
+  install:
+    desc: Build and install to GOPATH/bin
+    cmds:
+      - go install -ldflags="-s -w" ./cmd/safesh
+
+  test:
+    desc: Run all tests with race detector
+    cmds:
+      - go test -race -count=1 ./...
+
+  test:unit:
+    desc: Run unit tests only (no integration)
+    cmds:
+      - go test -race -count=1 -short ./...
+
+  test:cover:
+    desc: Run tests with coverage report
+    cmds:
+      - go test -race -count=1 -coverprofile=dist/coverage.out ./...
+      - go tool cover -html=dist/coverage.out -o dist/coverage.html
+      - go tool cover -func=dist/coverage.out | tail -1
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run ./...
+
+  lint:fix:
+    desc: Run golangci-lint with auto-fix
+    cmds:
+      - golangci-lint run --fix ./...
+
+  fmt:
+    desc: Format all Go code
+    cmds:
+      - gofmt -w .
+      - goimports -w . 2>/dev/null || true
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  tidy:
+    desc: Tidy go modules
+    cmds:
+      - go mod tidy
+
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -rf {{.BUILD_DIR}}
+
+  ci:
+    desc: Run everything CI would run (lint + test + build)
+    cmds:
+      - task: vet
+      - task: lint
+      - task: test
+      - task: build
+
+  release:dry:
+    desc: Dry-run goreleaser release
+    cmds:
+      - goreleaser release --snapshot --clean
+
+  release:check:
+    desc: Check goreleaser config
+    cmds:
+      - goreleaser check

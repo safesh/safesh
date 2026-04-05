@@ -10,7 +10,7 @@
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
 
 # Thumbnails
 ._*
@@ -216,4 +216,21 @@ pyrightconfig.json
 .worktrees/
 .gitworktree/
 .gitworktrees/
+.claude/
+!.claude/settings.json
+!.claude/commands/
+
+# Go
+/dist/
+*.exe
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
 
