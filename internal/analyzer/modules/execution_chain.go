@@ -9,6 +9,7 @@ import (
 // ExecutionChain flags nested pipe-to-shell patterns inside the script.
 type ExecutionChain struct{}
 
+// Analyze reports nested pipe-to-shell patterns found in src.
 func (ExecutionChain) Analyze(src []byte) []finding.Finding {
 	f, err := parse(src)
 	if err != nil {

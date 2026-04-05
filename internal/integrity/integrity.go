@@ -101,13 +101,13 @@ func fetchExpectedHash(scriptURL, filename string) (hash, source string, err err
 		resp, err := client.Get(url) //nolint:noctx
 		if err != nil || resp.StatusCode != http.StatusOK {
 			if resp != nil {
-				resp.Body.Close()
+				_ = resp.Body.Close()
 			}
 			continue
 		}
 
 		h, parseErr := parseChecksumFile(resp.Body, filename)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if parseErr != nil || h == "" {
 			continue
 		}

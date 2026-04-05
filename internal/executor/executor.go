@@ -147,7 +147,7 @@ func writeTempScript(content []byte) (string, error) {
 
 	path := filepath.Join(dir, "script.sh")
 	if err := os.WriteFile(path, content, 0o600); err != nil {
-		os.RemoveAll(dir)
+		_ = os.RemoveAll(dir)
 		return "", err
 	}
 	return path, nil

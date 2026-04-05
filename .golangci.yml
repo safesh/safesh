@@ -1,3 +1,5 @@
+version: "2"
+
 linters:
   enable:
     - errcheck
@@ -11,18 +13,24 @@ linters:
     - unconvert
     - unparam
     - whitespace
-
-linters-settings:
-  revive:
-    rules:
-      - name: exported
-        severity: warning
-      - name: var-naming
-        severity: warning
-  gosec:
-    excludes:
-      - G304  # File path from variable — expected for executor temp files
-      - G115  # Integer overflow uint->int — safe for line/col numbers from AST
+  settings:
+    errcheck:
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - (io.Closer).Close
+        - os.Remove
+    revive:
+      rules:
+        - name: exported
+          severity: warning
+        - name: var-naming
+          severity: warning
+    gosec:
+      excludes:
+        - G304  # File path from variable — expected for executor temp files
+        - G115  # Integer overflow uint->int — safe for line/col numbers from AST
 
 issues:
   exclude-rules:
