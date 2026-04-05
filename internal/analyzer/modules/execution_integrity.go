@@ -21,14 +21,20 @@ func (ExecutionIntegrity) Analyze(src []byte) []finding.Finding {
 
 	hasE, hasU, hasPipefail := false, false, false
 
-	syntax.Walk(f, func(node syntax.Node) bool {
-		call, ok := node.(*syntax.CallExpr)
+	// Only consider `set` commands at the top level of the script body.
+	// Iterate directly over the top-level statements of the parsed file and
+	// inspect each one. We deliberately do NOT recurse into nested scopes
+	// (function bodies, if/while/for/case clauses, subshells, etc.) because
+	// strict-mode flags set inside those scopes do not apply to the script as
+	// a whole and should not suppress the finding.
+	for _, stmt := range f.Stmts {
+		call, ok := stmt.Cmd.(*syntax.CallExpr)
 		if !ok {
-			return true
+			continue
 		}
 		args := callArgs(call)
 		if len(args) == 0 || args[0] != "set" {
-			return true
+			continue
 		}
 		e, u, p := parseSetFlags(args[1:])
 		if e {
@@ -40,8 +46,7 @@ func (ExecutionIntegrity) Analyze(src []byte) []finding.Finding {
 		if p {
 			hasPipefail = true
 		}
-		return true
-	})
+	}
 
 	var findings []finding.Finding
 	if !hasE {

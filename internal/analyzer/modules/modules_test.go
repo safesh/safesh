@@ -44,6 +44,28 @@ func TestExecutionIntegrity_HasSome(t *testing.T) {
 	assert.Equal(t, 1, cats["missing set -u"])
 }
 
+func TestExecutionIntegrity_SetInsideFunction(t *testing.T) {
+	// set -euo pipefail inside a function body must NOT suppress the finding;
+	// the flags must appear at the top level to be effective for the whole script.
+	src := []byte("#!/bin/bash\nmy_func() {\n  set -euo pipefail\n  echo inside\n}\necho hello\n")
+	findings := ExecutionIntegrity{}.Analyze(src)
+	assert.Len(t, findings, 3, "flags inside a function body should not count as top-level")
+}
+
+func TestExecutionIntegrity_SetInsideIf(t *testing.T) {
+	// set -euo pipefail inside an if-clause must NOT suppress the finding.
+	src := []byte("#!/bin/bash\nif true; then\n  set -euo pipefail\nfi\necho hello\n")
+	findings := ExecutionIntegrity{}.Analyze(src)
+	assert.Len(t, findings, 3, "flags inside an if-clause should not count as top-level")
+}
+
+func TestExecutionIntegrity_SetTopLevelAfterFunction(t *testing.T) {
+	// set -euo pipefail at the top level is fine even when a function is also present.
+	src := []byte("#!/bin/bash\nset -euo pipefail\nmy_func() {\n  echo inside\n}\necho hello\n")
+	findings := ExecutionIntegrity{}.Analyze(src)
+	assert.Empty(t, findings, "top-level set should suppress all findings")
+}
+
 // ── Destructive ───────────────────────────────────────────────────────────────
 
 func TestDestructive_RmRf(t *testing.T) {
