@@ -1,0 +1,19 @@
+services:
+  server:
+    image: python:3.12-alpine
+    working_dir: /scripts
+    volumes:
+      - ./scripts:/scripts:ro
+    command: ["python3", "-m", "http.server", "8080"]
+
+  test:
+    build:
+      context: ../..
+      dockerfile: examples/Dockerfile
+    depends_on:
+      - server
+    volumes:
+      - ./test.sh:/test.sh:ro
+    command: ["sh", "/test.sh"]
+    environment:
+      SERVER_URL: "http://server:8080"
