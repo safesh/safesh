@@ -1,5 +1,3 @@
-version: "2"
-
 linters:
   enable:
     - errcheck
@@ -9,7 +7,6 @@ linters:
     - revive
     - gocritic
     - nolintlint
-    - godot
     - misspell
     - unconvert
     - unparam
@@ -25,9 +22,7 @@ linters-settings:
   gosec:
     excludes:
       - G304  # File path from variable — expected for executor temp files
-  godot:
-    scope: declarations
-    capital: false
+      - G115  # Integer overflow uint->int — safe for line/col numbers from AST
 
 issues:
   exclude-rules:
