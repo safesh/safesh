@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 FAIL=0
 fail() { echo "FAIL: $*" >&2; FAIL=1; }
@@ -12,15 +11,14 @@ until curl -sf "$SERVER_URL/install.sh" > /dev/null 2>&1; do
     sleep 1
 done
 
-# --ci mode: findings are printed as warnings but execution proceeds
+# --ci mode: findings are printed as warnings but execution proceeds.
+# The script itself calls sudo which doesn't exist in the container, so
+# safesh will exit non-zero (script failure) — but it must NOT exit because
+# of findings alone. We capture output regardless of safesh exit code.
 echo "Running: curl | safesh --ci"
-OUTPUT=$(curl -fsSL "$SERVER_URL/install.sh" | safesh --ci 2>&1)
-STATUS=$?
+OUTPUT=$(curl -fsSL "$SERVER_URL/install.sh" | safesh --ci 2>&1) || true
 echo "$OUTPUT"
 
-# Script calls sudo which doesn't exist in the container, so exit code will be
-# non-zero from the script itself — but safesh should NOT exit non-zero due to
-# findings alone. Test that findings were reported as warnings.
 echo "$OUTPUT" | grep -q "privilege"  || fail "expected [privilege] finding"
 echo "$OUTPUT" | grep -q "network"    || fail "expected [network] finding"
 echo "$OUTPUT" | grep -q "proceeding" || fail "expected CI warning about proceeding"

@@ -1,10 +1,8 @@
 #!/bin/sh
-set -e
 
 FAIL=0
 fail() { echo "FAIL: $*" >&2; FAIL=1; }
 
-# Wait for the server to be ready
 echo "Waiting for server..."
 i=0
 until curl -sf "$SERVER_URL/install.sh" > /dev/null 2>&1; do
