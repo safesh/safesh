@@ -9,6 +9,7 @@ import (
 
 	"github.com/safesh/safesh/internal/finding"
 	"github.com/safesh/safesh/internal/history"
+	"github.com/safesh/safesh/internal/integrity"
 )
 
 const (
@@ -70,13 +71,22 @@ func PrintUnsuspiciousNotice(w io.Writer, useColor bool) {
 }
 
 // PrintIntegrityResult prints the integrity check result.
-func PrintIntegrityResult(w io.Writer, r interface {
-	IsChecked() bool
-	IsVerified() bool
-	Source() string
-}, useColor bool) {
-	// Use duck-typing approach via the history entry's checksum field
-	_ = r
+// r may be nil (no check was performed).
+func PrintIntegrityResult(w io.Writer, r *integrity.Result, useColor bool) {
+	if r == nil || !r.Checked {
+		return
+	}
+	if r.Verified {
+		label := tag(colorGreen, "✓ verified", useColor)
+		src := ""
+		if r.ChecksumSource != "" {
+			src = fmt.Sprintf(" (source: %s)", r.ChecksumSource)
+		}
+		fmt.Fprintf(w, "Integrity: %s %s%s\n", label, r.ActualHash[:16]+"…", src)
+	} else {
+		label := tag(colorRed, "✗ FAILED", useColor)
+		fmt.Fprintf(w, "Integrity: %s expected=%s got=%s\n", label, r.ExpectedHash, r.ActualHash)
+	}
 }
 
 // PrintEntry prints a full history entry to w.
@@ -103,6 +113,8 @@ func PrintEntry(w io.Writer, e *history.Entry, useColor bool) {
 			fmt.Fprintf(w, "Exit:    %s (%s)\n", tag(colorRed, exitStr, useColor), dur)
 		}
 	}
+
+	PrintIntegrityResult(w, m.Checksum, useColor)
 
 	if len(e.Findings) == 0 {
 		fmt.Fprintf(w, "\nFindings: %s\n", tag(colorGreen, "none", useColor))
