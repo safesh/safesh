@@ -45,6 +45,7 @@ type Meta struct {
 	DryRun          bool                `json:"dry_run"`
 	Observe         bool                `json:"observe,omitempty"`
 	Aborted         bool                `json:"aborted"`
+	CIMode          bool                `json:"ci_mode,omitempty"`
 	StrictMode      bool                `json:"strict_mode"`
 	Checksum        *integrity.Result   `json:"checksum,omitempty"`
 }
