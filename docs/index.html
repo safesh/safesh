@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>safesh — safer curl | bash</title>
   <meta name="description" content="A drop-in replacement for bash in the curl | bash pattern. Full buffering, strict mode, static analysis, and history — before a single line runs.">
+  <script>
+    // Apply saved theme before paint to prevent flash
+    (function() {
+      var saved = localStorage.getItem('theme');
+      var prefer = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      if ((saved || prefer) === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -13,6 +21,7 @@
       --surface:   #111116;
       --border:    #1e1e28;
       --text:      #dddde8;
+      --heading:   #ffffff;
       --muted:     #666674;
       --accent:    #f59e0b;
       --accent-dim:#7c4f05;
@@ -24,6 +33,20 @@
       --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     }
 
+    [data-theme="light"] {
+      --bg:        #fafafa;
+      --surface:   #f4f4f5;
+      --border:    #e4e4e7;
+      --text:      #18181b;
+      --heading:   #09090b;
+      --muted:     #71717a;
+      --accent:    #d97706;
+      --accent-dim:#fef3c7;
+      --green:     #16a34a;
+      --red:       #dc2626;
+      --code-bg:   #1a1a20;
+    }
+
     html { scroll-behavior: smooth; }
 
     body {
@@ -33,6 +56,7 @@
       font-size: 16px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      transition: background 0.2s, color 0.2s;
     }
 
     a { color: var(--accent); text-decoration: none; }
@@ -69,6 +93,23 @@
       margin-left: 24px;
     }
     nav a:hover { color: var(--text); text-decoration: none; }
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--muted);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 20px;
+      flex-shrink: 0;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .theme-toggle:hover { color: var(--text); border-color: var(--muted); }
+    .theme-toggle svg { width: 15px; height: 15px; fill: currentColor; }
 
     /* ── Hero ── */
     .hero {
@@ -93,7 +134,7 @@
       font-weight: 700;
       letter-spacing: -0.03em;
       line-height: 1.15;
-      color: #fff;
+      color: var(--heading);
       margin-bottom: 20px;
     }
     h1 em {
@@ -172,7 +213,7 @@
       font-size: 1.375rem;
       font-weight: 600;
       letter-spacing: -0.02em;
-      color: #fff;
+      color: var(--heading);
       margin-bottom: 8px;
     }
     .demo .sub, .features .sub, .findings .sub {
@@ -196,7 +237,7 @@
     .terminal .t-warn   { color: var(--accent); }
     .terminal .t-ok     { color: var(--green); }
     .terminal .t-err    { color: var(--red); }
-    .terminal .t-head   { color: #fff; font-weight: 600; }
+    .terminal .t-head   { color: #e2e2e8; font-weight: 600; }
 
     /* ── Features ── */
     .features {
@@ -221,7 +262,7 @@
     .feature-card h3 {
       font-size: 0.9rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--heading);
       margin-bottom: 6px;
     }
     .feature-card p {
@@ -321,6 +362,12 @@
       <a href="https://github.com/safesh/safesh">GitHub</a>
       <a href="https://github.com/safesh/safesh/releases">Releases</a>
       <a href="https://github.com/safesh/safesh/issues">Issues</a>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" id="theme-btn">
+        <!-- moon (shown in dark mode) -->
+        <svg id="icon-moon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+        <!-- sun (shown in light mode, hidden by default) -->
+        <svg id="icon-sun" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:none"><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-14a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 16a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zm9-9a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2h1zM4 12a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2h1zm14.66-6.24a1 1 0 0 1 0 1.42l-.71.7a1 1 0 1 1-1.41-1.41l.7-.71a1 1 0 0 1 1.42 0zm-12.5 12.5a1 1 0 0 1 0 1.41l-.71.71a1 1 0 0 1-1.41-1.42l.71-.7a1 1 0 0 1 1.41 0zm12.5.71a1 1 0 0 1-1.42 0l-.7-.71a1 1 0 0 1 1.41-1.41l.71.7a1 1 0 0 1 0 1.42zM6.16 7.18a1 1 0 0 1-1.41 0l-.71-.7a1 1 0 0 1 1.42-1.42l.7.71a1 1 0 0 1 0 1.41z"/></svg>
+      </button>
     </nav>
   </div>
 </header>
@@ -493,6 +540,26 @@
       setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
     });
   }
+
+  function syncIcon() {
+    var light = document.documentElement.getAttribute('data-theme') === 'light';
+    document.getElementById('icon-moon').style.display = light ? 'none' : '';
+    document.getElementById('icon-sun').style.display  = light ? ''     : 'none';
+  }
+
+  function toggleTheme() {
+    var light = document.documentElement.getAttribute('data-theme') === 'light';
+    if (light) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+    }
+    syncIcon();
+  }
+
+  syncIcon();
 </script>
 </body>
 </html>
