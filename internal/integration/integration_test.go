@@ -16,28 +16,45 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// binaryPath returns the path to the safesh binary, building it if needed.
-func binaryPath(t *testing.T) string {
-	t.Helper()
-	bin := filepath.Join(t.TempDir(), "safesh")
+var (
+	cachedBin     string
+	cachedBinOnce sync.Once
+)
+
+func TestMain(m *testing.M) {
+	root := findProjectRoot()
+	bin := filepath.Join(os.TempDir(), "safesh-integration-test")
 	cmd := exec.Command("go", "build", "-o", bin, "github.com/safesh/safesh/cmd/safesh")
-	cmd.Dir = projectRoot(t)
-	out, err := cmd.CombinedOutput()
-	require.NoError(t, err, "building safesh: %s", out)
-	return bin
+	cmd.Dir = root
+	if out, err := cmd.CombinedOutput(); err != nil {
+		panic("building safesh: " + err.Error() + "\n" + string(out))
+	}
+	cachedBin = bin
+	code := m.Run()
+	os.Remove(bin)
+	os.Exit(code)
 }
 
-// projectRoot finds the repo root by looking for go.mod.
-func projectRoot(t *testing.T) string {
+// binaryPath returns the path to the pre-built safesh binary.
+func binaryPath(t *testing.T) string {
 	t.Helper()
+	cachedBinOnce.Do(func() {})
+	return cachedBin
+}
+
+// findProjectRoot finds the repo root by looking for go.mod.
+func findProjectRoot() string {
 	_, file, _, ok := runtime.Caller(0)
-	require.True(t, ok)
+	if !ok {
+		panic("could not determine source file path")
+	}
 	dir := filepath.Dir(file)
 	for dir != "/" {
 		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
@@ -45,8 +62,13 @@ func projectRoot(t *testing.T) string {
 		}
 		dir = filepath.Dir(dir)
 	}
-	t.Fatal("could not find project root")
-	return ""
+	panic("could not find project root")
+}
+
+// projectRoot finds the repo root by looking for go.mod.
+func projectRoot(t *testing.T) string {
+	t.Helper()
+	return findProjectRoot()
 }
 
 // testdataScript reads a testdata script.
