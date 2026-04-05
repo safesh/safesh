@@ -52,7 +52,7 @@ changelog:
 
 release:
   github:
-    owner: adeshmukh
+    owner: safesh
     name: safesh
   draft: false
   prerelease: auto
