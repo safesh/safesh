@@ -33,13 +33,14 @@ func main() {
 
 // flags holds CLI flag values.
 type flags struct {
-	dryRun    bool
-	sha256    string
-	envVars   []string
-	noStrict  bool
-	noConfirm bool
+	dryRun     bool
+	sha256     string
+	envVars    []string
+	noStrict   bool
+	noConfirm  bool
+	ci         bool
 	configPath string
-	explain   string
+	explain    string
 }
 
 func newRootCmd() *cobra.Command {
@@ -68,6 +69,7 @@ Usage:
 	root.PersistentFlags().StringArrayVar(&f.envVars, "env", nil, "pass through environment variable (repeatable)")
 	root.PersistentFlags().BoolVar(&f.noStrict, "no-strict", false, "do not inject set -euo pipefail")
 	root.PersistentFlags().BoolVar(&f.noConfirm, "no-confirm", false, "skip confirmation prompt")
+	root.PersistentFlags().BoolVar(&f.ci, "ci", false, "CI mode: skip prompt, print findings as warnings, exit non-zero only on execution failure")
 	root.PersistentFlags().StringVar(&f.configPath, "config", "", "config file path")
 	root.PersistentFlags().StringVar(&f.explain, "explain", "", "print explanation for a finding category")
 
@@ -168,7 +170,13 @@ func runMain(_ *cobra.Command, args []string, f *flags) error {
 	blockingFindings := analyzer.FilterByCategories(findings, blockingCats)
 
 	aborted := false
-	if len(findings) > 0 && !f.noConfirm && cfg.Defaults.ConfirmOnFindings {
+	if f.ci {
+		// CI mode: print findings as warnings but never block on them.
+		// Findings are already printed above; emit a notice if any were found.
+		if len(findings) > 0 {
+			fmt.Fprintf(os.Stderr, "warning: safesh --ci: %d finding(s) reported above; proceeding with execution\n", len(findings))
+		}
+	} else if len(findings) > 0 && !f.noConfirm && cfg.Defaults.ConfirmOnFindings {
 		isInteractive := ui.IsInteractive()
 		if len(blockingFindings) > 0 || isInteractive {
 			confirmed := ui.Confirm(!isInteractive, ui.DefaultConfirmOptions())
@@ -204,6 +212,7 @@ func runMain(_ *cobra.Command, args []string, f *flags) error {
 		User:           user,
 		DryRun:         f.dryRun,
 		Aborted:        aborted,
+		CIMode:         f.ci,
 		StrictMode:     !f.noStrict && cfg.Defaults.StrictMode,
 		Checksum:       integrityResult,
 	}

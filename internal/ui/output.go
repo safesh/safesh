@@ -104,6 +104,8 @@ func PrintEntry(w io.Writer, e *history.Entry, useColor bool) {
 		fmt.Fprintf(w, "Mode:    %s\n", tag(colorCyan, "dry-run", useColor))
 	case m.Aborted:
 		fmt.Fprintf(w, "Mode:    %s\n", tag(colorYellow, "aborted", useColor))
+	case m.CIMode:
+		fmt.Fprintf(w, "Mode:    %s\n", tag(colorCyan, "ci", useColor))
 	case e.Exit != nil:
 		exitStr := fmt.Sprintf("exit %d", e.Exit.ExitCode)
 		dur := fmt.Sprintf("%.1fs", float64(e.Exit.DurationMS)/1000)
@@ -134,10 +136,13 @@ func PrintEntryList(w io.Writer, metas []history.Meta, useColor bool) {
 	}
 	for _, m := range metas {
 		status := ""
-		if m.DryRun {
+		switch {
+		case m.DryRun:
 			status = " " + tag(colorCyan, "[dry-run]", useColor)
-		} else if m.Aborted {
+		case m.Aborted:
 			status = " " + tag(colorYellow, "[aborted]", useColor)
+		case m.CIMode:
+			status = " " + tag(colorCyan, "[ci]", useColor)
 		}
 		fmt.Fprintf(w, "%s  %s  %s%s\n",
 			m.ID,
