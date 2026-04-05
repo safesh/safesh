@@ -1,3 +1,5 @@
+<img src="docs/icon.svg" width="64" alt="safesh icon">
+
 # safesh
 
 A drop-in replacement for `bash` in the `curl | bash` pattern that makes script execution meaningfully safer with minimal friction.
