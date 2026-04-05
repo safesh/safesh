@@ -12,6 +12,7 @@ import (
 // ExecutionIntegrity checks for missing strict-mode flags.
 type ExecutionIntegrity struct{}
 
+// Analyze reports missing or misplaced strict-mode flags found in src.
 func (ExecutionIntegrity) Analyze(src []byte) []finding.Finding {
 	f, err := parse(src)
 	if err != nil {

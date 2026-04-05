@@ -11,6 +11,7 @@ import (
 // Obfuscation flags patterns that hide what the script does.
 type Obfuscation struct{}
 
+// Analyze reports obfuscation patterns found in src.
 func (Obfuscation) Analyze(src []byte) []finding.Finding {
 	f, err := parse(src)
 	if err != nil {

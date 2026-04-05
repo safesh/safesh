@@ -20,6 +20,7 @@ var networkCommands = map[string]bool{
 	"httpie": true,
 }
 
+// Analyze reports outbound network calls found in src.
 func (Network) Analyze(src []byte) []finding.Finding {
 	f, err := parse(src)
 	if err != nil {

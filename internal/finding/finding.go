@@ -4,6 +4,7 @@ package finding
 // Category identifies the type of finding.
 type Category string
 
+// Category constants for finding classification.
 const (
 	CategoryExecutionIntegrity Category = "execution-integrity"
 	CategoryDestructive        Category = "destructive"

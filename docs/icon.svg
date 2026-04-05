@@ -2,11 +2,11 @@
   <!-- Shield shape: rounded-bottom pentagon centered in 64x64 box -->
   <path d="M32 6 L54 16 L54 34 C54 47 43 56 32 60 C21 56 10 47 10 34 L10 16 Z"
         fill="#f59e0b" stroke="none"/>
-  <!-- Dollar sign centered in shield -->
+  <!-- Shell prompt centered in shield -->
   <text x="32" y="42"
         font-family="'SF Mono','JetBrains Mono','Fira Code',ui-monospace,monospace"
-        font-size="26"
+        font-size="22"
         font-weight="700"
         text-anchor="middle"
-        fill="#0a0a0c">$</text>
+        fill="#0a0a0c">&gt;_</text>
 </svg>

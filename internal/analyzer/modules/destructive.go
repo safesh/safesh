@@ -20,6 +20,7 @@ var destructivePatterns = map[string][]string{
 	"truncate": {"-s 0", "--size=0", "--size 0"},
 }
 
+// Analyze reports irreversible filesystem operations found in src.
 func (Destructive) Analyze(src []byte) []finding.Finding {
 	f, err := parse(src)
 	if err != nil {

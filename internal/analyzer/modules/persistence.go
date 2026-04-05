@@ -22,6 +22,7 @@ var persistenceTargets = []string{
 	".xinitrc", ".xprofile", ".config/autostart",
 }
 
+// Analyze reports modifications that survive the current session found in src.
 func (Persistence) Analyze(src []byte) []finding.Finding {
 	f, err := parse(src)
 	if err != nil {
