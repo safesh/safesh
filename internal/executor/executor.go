@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/safesh/safesh/internal/sandbox"
 )
 
 // safeEnvVars is the set of environment variable names passed through by default.
@@ -20,11 +22,12 @@ var safeEnvVars = map[string]bool{
 
 // Options controls executor behaviour.
 type Options struct {
-	Shell            string   // resolved shell binary path
-	StrictMode       bool     // prepend set -euo pipefail
-	IsolateEnv       bool     // strip env to safe baseline
-	ExtraEnvPassthrough []string // additional vars to pass through
-	DryRun           bool     // skip execution (analysis only)
+	Shell               string         // resolved shell binary path
+	StrictMode          bool           // prepend set -euo pipefail
+	IsolateEnv          bool           // strip env to safe baseline
+	ExtraEnvPassthrough []string       // additional vars to pass through
+	DryRun              bool           // skip execution (analysis only)
+	Sandbox             sandbox.Config // sandbox configuration
 }
 
 // Result holds execution outcome.
@@ -51,8 +54,14 @@ func Run(src []byte, opts Options) (Result, error) {
 
 	env := buildEnv(opts.IsolateEnv, opts.ExtraEnvPassthrough)
 
+	// Resolve the command to run, wrapping with a sandbox backend if requested.
+	bin, cmdArgs, err := sandbox.WrapCommand(opts.Shell, tmpFile, opts.Sandbox)
+	if err != nil {
+		return Result{}, fmt.Errorf("sandbox: %w", err)
+	}
+
 	start := time.Now()
-	cmd := exec.Command(opts.Shell, tmpFile) //nolint:gosec
+	cmd := exec.Command(bin, cmdArgs...) //nolint:gosec
 	cmd.Env = env
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

@@ -14,6 +14,7 @@ import (
 	"github.com/safesh/safesh/internal/finding"
 	"github.com/safesh/safesh/internal/history"
 	"github.com/safesh/safesh/internal/integrity"
+	"github.com/safesh/safesh/internal/sandbox"
 	"github.com/safesh/safesh/internal/ui"
 )
 
@@ -33,13 +34,15 @@ func main() {
 
 // flags holds CLI flag values.
 type flags struct {
-	dryRun    bool
-	sha256    string
-	envVars   []string
-	noStrict  bool
-	noConfirm bool
-	configPath string
-	explain   string
+	dryRun         bool
+	sha256         string
+	envVars        []string
+	noStrict       bool
+	noConfirm      bool
+	configPath     string
+	explain        string
+	sandbox        bool
+	sandboxAllowNet bool
 }
 
 func newRootCmd() *cobra.Command {
@@ -70,6 +73,8 @@ Usage:
 	root.PersistentFlags().BoolVar(&f.noConfirm, "no-confirm", false, "skip confirmation prompt")
 	root.PersistentFlags().StringVar(&f.configPath, "config", "", "config file path")
 	root.PersistentFlags().StringVar(&f.explain, "explain", "", "print explanation for a finding category")
+	root.PersistentFlags().BoolVar(&f.sandbox, "sandbox", false, "run script inside a bubblewrap sandbox (Linux only, requires bwrap)")
+	root.PersistentFlags().BoolVar(&f.sandboxAllowNet, "sandbox-allow-net", false, "allow network access inside the sandbox (default: network is blocked)")
 
 	root.AddCommand(newVersionCmd())
 	root.AddCommand(newHistoryCmd(f))
@@ -226,6 +231,10 @@ func runMain(_ *cobra.Command, args []string, f *flags) error {
 		IsolateEnv:          cfg.Defaults.EnvironmentIsolation,
 		ExtraEnvPassthrough: append(cfg.Environment.Passthrough, f.envVars...),
 		DryRun:              f.dryRun,
+		Sandbox: sandbox.Config{
+			Enabled:  f.sandbox,
+			AllowNet: f.sandboxAllowNet,
+		},
 	}
 
 	result, execErr := executor.Run(fetch.Content, opts)
