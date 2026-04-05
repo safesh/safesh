@@ -23,6 +23,29 @@ const (
 	colorDim    = "\033[2m"
 )
 
+// PrintFetchBanner writes the "safesh fetched N KB [· sha256 verified]" line.
+func PrintFetchBanner(w io.Writer, size int, ir *integrity.Result, useColor bool) {
+	msg := "safesh fetched " + formatSize(size)
+	if ir != nil && ir.Checked {
+		if ir.Verified {
+			msg += " · " + tag(colorGreen, "sha256 verified", useColor)
+		} else {
+			msg += " · " + tag(colorRed, "sha256 FAILED", useColor)
+		}
+	}
+	fmt.Fprintln(w, msg)
+}
+
+// PrintSuccess writes the "✓  exited N · history saved to ..." line.
+func PrintSuccess(w io.Writer, exitCode int, dryRun bool, histDir string, useColor bool) {
+	check := tag(colorGreen, "✓", useColor)
+	if dryRun {
+		fmt.Fprintf(w, "%s  dry-run complete · history saved to %s\n", check, histDir)
+		return
+	}
+	fmt.Fprintf(w, "%s  exited %d · history saved to %s\n", check, exitCode, histDir)
+}
+
 // PrintFindings writes the findings report to w.
 func PrintFindings(w io.Writer, findings []finding.Finding, useColor bool) {
 	if len(findings) == 0 {
@@ -30,7 +53,15 @@ func PrintFindings(w io.Writer, findings []finding.Finding, useColor bool) {
 		return
 	}
 
-	fmt.Fprintf(w, "\n%ssafesh findings:%s\n", bold(useColor), colorReset)
+	fmt.Fprintf(w, "%s  %d findings\n\n", tag(colorYellow, "⚠", useColor), len(findings))
+
+	// Compute max category width for column alignment.
+	maxCat := 0
+	for _, f := range findings {
+		if l := len(string(f.Category)); l > maxCat {
+			maxCat = l
+		}
+	}
 
 	// Group by category
 	byCategory := make(map[finding.Category][]finding.Finding)
@@ -43,22 +74,20 @@ func PrintFindings(w io.Writer, findings []finding.Finding, useColor bool) {
 		if !ok {
 			continue
 		}
-		catLabel := fmt.Sprintf("[%s]", cat)
+		catPadded := fmt.Sprintf("%-*s", maxCat, string(cat))
 		for _, f := range fs {
-			line := ""
+			lineCol := "           " // 11 spaces — matches "  line NNNN" width
 			if f.Line > 0 {
-				line = fmt.Sprintf("  line %-4d", f.Line)
-			} else {
-				line = "            "
+				lineCol = fmt.Sprintf("  line %-4d", f.Line)
 			}
 			fmt.Fprintf(w, "  %s%s  %s\n",
-				tag(colorYellow, catLabel, useColor),
-				line,
+				tag(colorYellow, catPadded, useColor),
+				lineCol,
 				f.Description,
 			)
 			if f.Snippet != "" {
-				fmt.Fprintf(w, "              %s%s%s\n",
-					dim(useColor), f.Snippet, colorReset)
+				indent := strings.Repeat(" ", 2+maxCat+len(lineCol)+2)
+				fmt.Fprintf(w, "%s%s%s%s\n", indent, dim(useColor), f.Snippet, colorReset)
 			}
 		}
 	}
@@ -234,4 +263,15 @@ func truncate(s string, max int) string {
 		return s
 	}
 	return s[:max-3] + "..."
+}
+
+func formatSize(n int) string {
+	switch {
+	case n >= 1024*1024:
+		return fmt.Sprintf("%.1f MB", float64(n)/(1024*1024))
+	case n >= 1024:
+		return fmt.Sprintf("%.1f KB", float64(n)/1024)
+	default:
+		return fmt.Sprintf("%d B", n)
+	}
 }

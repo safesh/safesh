@@ -159,15 +159,13 @@ func runMain(_ *cobra.Command, args []string, f *flags) error {
 	if urlArg != "" || f.sha256 != "" {
 		ir := integrity.Check(fetch.Content, fetch.Source, f.sha256)
 		integrityResult = &ir
-		if ir.Checked {
-			if ir.Verified {
-				fmt.Fprintf(os.Stderr, "✓ integrity verified (%s)\n", ir.ChecksumSource)
-			} else {
-				fmt.Fprintf(os.Stderr, "✗ integrity check FAILED: expected %s got %s\n",
-					ir.ExpectedHash, ir.ActualHash)
-				return fmt.Errorf("integrity check failed")
-			}
-		}
+	}
+
+	ui.PrintFetchBanner(os.Stderr, len(fetch.Content), integrityResult, useColor)
+
+	if integrityResult != nil && integrityResult.Checked && !integrityResult.Verified {
+		return fmt.Errorf("integrity check failed: expected %s got %s",
+			integrityResult.ExpectedHash, integrityResult.ActualHash)
 	}
 
 	// Analyse
@@ -303,6 +301,7 @@ func runMain(_ *cobra.Command, args []string, f *flags) error {
 	if result.ExitCode != 0 {
 		os.Exit(result.ExitCode)
 	}
+	ui.PrintSuccess(os.Stderr, result.ExitCode, result.Skipped, history.DefaultDir(), useColor)
 	return nil
 }
 
