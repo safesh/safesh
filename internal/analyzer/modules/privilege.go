@@ -17,6 +17,7 @@ var privilegeCommands = map[string]bool{
 	"runuser": true,
 }
 
+// Analyze reports privilege escalation commands found in src.
 func (Privilege) Analyze(src []byte) []finding.Finding {
 	f, err := parse(src)
 	if err != nil {
