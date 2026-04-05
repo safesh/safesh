@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/adeshmukh/safesh/internal/finding"
-	"github.com/adeshmukh/safesh/internal/history"
+	"github.com/safesh/safesh/internal/finding"
+	"github.com/safesh/safesh/internal/history"
 )
 
 const (

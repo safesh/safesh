@@ -5,7 +5,7 @@ import (
 
 	"mvdan.cc/sh/v3/syntax"
 
-	"github.com/adeshmukh/safesh/internal/finding"
+	"github.com/safesh/safesh/internal/finding"
 )
 
 // Obfuscation flags patterns that hide what the script does.

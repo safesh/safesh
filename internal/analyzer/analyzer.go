@@ -4,8 +4,8 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/adeshmukh/safesh/internal/analyzer/modules"
-	"github.com/adeshmukh/safesh/internal/finding"
+	"github.com/safesh/safesh/internal/analyzer/modules"
+	"github.com/safesh/safesh/internal/finding"
 )
 
 // defaultModules is the set of modules run on every script.

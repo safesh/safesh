@@ -6,7 +6,7 @@ import (
 
 	"mvdan.cc/sh/v3/syntax"
 
-	"github.com/adeshmukh/safesh/internal/finding"
+	"github.com/safesh/safesh/internal/finding"
 )
 
 // Network flags outbound network calls and extracts destination domains.

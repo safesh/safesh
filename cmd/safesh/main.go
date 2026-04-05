@@ -7,14 +7,14 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/adeshmukh/safesh/internal/analyzer"
-	"github.com/adeshmukh/safesh/internal/config"
-	"github.com/adeshmukh/safesh/internal/executor"
-	"github.com/adeshmukh/safesh/internal/fetcher"
-	"github.com/adeshmukh/safesh/internal/finding"
-	"github.com/adeshmukh/safesh/internal/history"
-	"github.com/adeshmukh/safesh/internal/integrity"
-	"github.com/adeshmukh/safesh/internal/ui"
+	"github.com/safesh/safesh/internal/analyzer"
+	"github.com/safesh/safesh/internal/config"
+	"github.com/safesh/safesh/internal/executor"
+	"github.com/safesh/safesh/internal/fetcher"
+	"github.com/safesh/safesh/internal/finding"
+	"github.com/safesh/safesh/internal/history"
+	"github.com/safesh/safesh/internal/integrity"
+	"github.com/safesh/safesh/internal/ui"
 )
 
 // Build-time variables set by goreleaser.

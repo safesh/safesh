@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/adeshmukh/safesh/internal/finding"
+	"github.com/safesh/safesh/internal/finding"
 )
 
 func TestPrintFindings_Empty(t *testing.T) {

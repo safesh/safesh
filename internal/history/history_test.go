@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/adeshmukh/safesh/internal/finding"
+	"github.com/safesh/safesh/internal/finding"
 )
 
 func TestNewID(t *testing.T) {

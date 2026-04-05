@@ -3,7 +3,7 @@ package modules
 import (
 	"mvdan.cc/sh/v3/syntax"
 
-	"github.com/adeshmukh/safesh/internal/finding"
+	"github.com/safesh/safesh/internal/finding"
 )
 
 // Privilege flags privilege escalation commands.

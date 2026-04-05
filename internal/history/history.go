@@ -12,8 +12,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/adeshmukh/safesh/internal/finding"
-	"github.com/adeshmukh/safesh/internal/integrity"
+	"github.com/safesh/safesh/internal/finding"
+	"github.com/safesh/safesh/internal/integrity"
 )
 
 // DefaultDir returns the default history directory.

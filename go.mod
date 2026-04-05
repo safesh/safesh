@@ -1,4 +1,4 @@
-module github.com/adeshmukh/safesh
+module github.com/safesh/safesh
 
 go 1.26.1
 

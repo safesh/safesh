@@ -26,7 +26,7 @@ import (
 func binaryPath(t *testing.T) string {
 	t.Helper()
 	bin := filepath.Join(t.TempDir(), "safesh")
-	cmd := exec.Command("go", "build", "-o", bin, "github.com/adeshmukh/safesh/cmd/safesh")
+	cmd := exec.Command("go", "build", "-o", bin, "github.com/safesh/safesh/cmd/safesh")
 	cmd.Dir = projectRoot(t)
 	out, err := cmd.CombinedOutput()
 	require.NoError(t, err, "building safesh: %s", out)
