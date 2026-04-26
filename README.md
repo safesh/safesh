@@ -2,7 +2,11 @@
 
 # safesh
 
+[![CI](https://github.com/safesh/safesh/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/safesh/safesh/actions/workflows/ci.yml?query=branch%3Amain)
+
 A drop-in replacement for `bash` in the `curl | bash` pattern that makes script execution meaningfully safer with minimal friction.
+
+Website: [safesh.sh](https://safesh.sh)
 
 ```sh
 # Before
