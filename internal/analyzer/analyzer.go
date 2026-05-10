@@ -17,6 +17,7 @@ var defaultModules = []finding.Module{
 	modules.Network{},
 	modules.Obfuscation{},
 	modules.ExecutionChain{},
+	modules.Homograph{},
 }
 
 // Analyze runs all modules against src and returns sorted findings.

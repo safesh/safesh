@@ -13,6 +13,7 @@ const (
 	CategoryNetwork            Category = "network"
 	CategoryObfuscation        Category = "obfuscation"
 	CategoryExecutionChain     Category = "execution-chain"
+	CategoryHomograph          Category = "homograph"
 )
 
 // AllCategories lists every known category in display order.
@@ -24,6 +25,7 @@ var AllCategories = []Category{
 	CategoryNetwork,
 	CategoryObfuscation,
 	CategoryExecutionChain,
+	CategoryHomograph,
 }
 
 // Finding represents a single analysis result.

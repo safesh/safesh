@@ -412,12 +412,13 @@ func printExplanation(category string) {
 		"network":             "Lists outbound network calls (curl, wget) and the domains contacted.",
 		"obfuscation":         "Flags eval and base64-decode-then-execute chains that hide what the script does.",
 		"execution-chain":     "Flags nested curl|bash patterns inside the script — the same risk you're already guarding against.",
+		"homograph":           "Flags Unicode hazards: bidi/RTL override controls, zero-width characters, and non-ASCII or mixed-script URL hosts (IDN homograph attacks).",
 	}
 
 	if desc, ok := explanations[category]; ok {
 		fmt.Printf("[%s]\n%s\n", category, desc)
 	} else {
 		fmt.Printf("unknown category %q\n", category)
-		fmt.Printf("known categories: execution-integrity, destructive, privilege, persistence, network, obfuscation, execution-chain\n")
+		fmt.Printf("known categories: execution-integrity, destructive, privilege, persistence, network, obfuscation, execution-chain, homograph\n")
 	}
 }

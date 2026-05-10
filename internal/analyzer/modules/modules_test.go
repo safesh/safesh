@@ -204,3 +204,71 @@ func TestExecutionChain_None(t *testing.T) {
 	findings := ExecutionChain{}.Analyze(src)
 	assert.Empty(t, findings)
 }
+
+// ── Homograph ─────────────────────────────────────────────────────────────────────
+
+func TestHomograph_CleanASCII(t *testing.T) {
+	src := []byte("#!/bin/bash\ncurl -fsSL https://github.com/foo/bar/install.sh | bash\n")
+	findings := Homograph{}.Analyze(src)
+	assert.Empty(t, findings)
+}
+
+func TestHomograph_NonASCIIHost(t *testing.T) {
+	// All-Cyrillic host (U+043F U+0440 U+0438 U+043C U+0435 U+0440 . U+0440 U+0444).
+	host := "\u043f\u0440\u0438\u043c\u0435\u0440.\u0440\u0444"
+	src := []byte("#!/bin/bash\ncurl -fsSL https://" + host + "/install.sh -o /tmp/x\n")
+	findings := Homograph{}.Analyze(src)
+	require.NotEmpty(t, findings)
+	assert.Equal(t, finding.CategoryHomograph, findings[0].Category)
+	assert.Contains(t, findings[0].Description, "homograph")
+}
+
+func TestHomograph_MixedScriptHost(t *testing.T) {
+	// Latin "githu" + Cyrillic 'b' (U+0431) inside one label.
+	host := "githu\u0431.com"
+	src := []byte("#!/bin/bash\ncurl -fsSL https://" + host + "/install.sh -o /tmp/x\n")
+	findings := Homograph{}.Analyze(src)
+	require.NotEmpty(t, findings)
+	assert.Contains(t, findings[0].Description, "mixes scripts")
+}
+
+func TestHomograph_RTLOverride(t *testing.T) {
+	// U+202E embedded in a comment reverses subsequent rendered text.
+	src := []byte("#!/bin/bash\n# rm -rf \u202egpj.elif\n")
+	findings := Homograph{}.Analyze(src)
+	require.NotEmpty(t, findings)
+	assert.Equal(t, finding.CategoryHomograph, findings[0].Category)
+	assert.Contains(t, findings[0].Description, "bidi control")
+	assert.Contains(t, findings[0].Description, "U+202E")
+}
+
+func TestHomograph_ZeroWidthJoiner(t *testing.T) {
+	// `cu<ZWJ>rl` looks like `curl` but is a different identifier.
+	src := []byte("#!/bin/bash\ncu\u200drl https://example.com\n")
+	findings := Homograph{}.Analyze(src)
+	require.NotEmpty(t, findings)
+	assert.Contains(t, findings[0].Description, "zero-width")
+	assert.Contains(t, findings[0].Description, "U+200D")
+}
+
+func TestHomograph_BOM(t *testing.T) {
+	src := []byte("#!/bin/bash\n\ufeffecho hi\n")
+	findings := Homograph{}.Analyze(src)
+	require.NotEmpty(t, findings)
+	assert.Contains(t, findings[0].Description, "U+FEFF")
+}
+
+func TestHomograph_PunycodeHostNotFlagged(t *testing.T) {
+	// Pre-encoded punycode is pure ASCII and should pass without findings.
+	src := []byte("#!/bin/bash\ncurl -fsSL https://xn--80ak6aa92e.com/install.sh\n")
+	findings := Homograph{}.Analyze(src)
+	assert.Empty(t, findings)
+}
+
+func TestHomograph_LineAndColumn(t *testing.T) {
+	// Ensure we report a useful position for an invisible control.
+	src := []byte("#!/bin/bash\necho ok\necho \u202ehidden\n")
+	findings := Homograph{}.Analyze(src)
+	require.NotEmpty(t, findings)
+	assert.Equal(t, 3, findings[0].Line)
+}
