@@ -148,7 +148,6 @@
     .hero p {
       font-size: 1.125rem;
       color: var(--muted);
-      max-width: 560px;
       margin-bottom: 40px;
     }
 
@@ -283,7 +282,7 @@
     }
     .compare tbody code {
       font-family: var(--mono);
-      font-size: 0.82rem;
+      font-size: 0.72rem;
       color: var(--text);
       white-space: nowrap;
       overflow-x: auto;
@@ -477,8 +476,10 @@
 
 <section class="hero">
   <div class="container">
-    <div class="badge">⚠ curl | bash is risky</div>
-    <h1>A safer <em>curl | bash</em></h1>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px;">
+      <h1 style="margin-bottom:0">A safer <em>curl | bash</em></h1>
+      <div class="badge" style="margin-bottom:0">⚠ curl | bash is risky</div>
+    </div>
     <p>
       Drop-in replacement for <code style="font-family:var(--mono);font-size:0.95em;color:var(--text)">bash</code> in the
       <code style="font-family:var(--mono);font-size:0.95em;color:var(--text)">curl | bash</code> pattern.
