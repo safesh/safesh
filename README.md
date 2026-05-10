@@ -30,6 +30,9 @@ curl -fsSL https://example.com/install.sh | safesh
 ## Installation
 
 ```sh
+# Homebrew (macOS / Linux)
+brew install safesh/tap/safesh
+
 # Via go install
 go install github.com/safesh/safesh/cmd/safesh@latest
 ```

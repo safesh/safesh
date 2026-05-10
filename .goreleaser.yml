@@ -27,10 +27,10 @@ builds:
 archives:
   - id: safesh
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    format: tar.gz
+    formats: [tar.gz]
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
     files:
       - README.md
       - LICENSE
@@ -60,3 +60,24 @@ release:
 
 snapshot:
   version_template: "{{ .Tag }}-next"
+
+brews:
+  - name: safesh
+    repository:
+      owner: safesh
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    commit_author:
+      name: safesh-releaser
+      email: releases@safesh.sh
+    commit_msg_template: "safesh {{ .Tag }}"
+    homepage: "https://safesh.sh"
+    description: "Drop-in safer replacement for bash in curl|bash flows."
+    license: "MIT"
+    skip_upload: auto
+    test: |
+      system "#{bin}/safesh", "version"
+    install: |
+      bin.install "safesh"
