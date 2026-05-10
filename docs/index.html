@@ -19,16 +19,16 @@
 
     :root {
       --bg:        #0a0a0c;
-      --surface:   #111116;
-      --border:    #1e1e28;
+      --surface:   #16161f;
+      --border:    #2e2e3c;
       --text:      #dddde8;
       --heading:   #ffffff;
-      --muted:     #666674;
+      --muted:     #9aa0b0;
       --accent:    #f59e0b;
       --accent-dim:#7c4f05;
       --green:     #4ade80;
       --red:       #f87171;
-      --code-bg:   #16161e;
+      --code-bg:   #1c1c28;
       --radius:    6px;
       --mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
       --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -69,6 +69,7 @@
       margin: 0 auto;
       padding: 0 24px;
     }
+    .container-wide { max-width: 900px; }
 
     /* ── Header ── */
     header {
@@ -179,8 +180,7 @@
       flex: 1;
       min-width: 0;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      overflow-x: auto;
     }
     .cmd-row code .prompt { color: var(--muted); user-select: none; }
     .copy-btn {
@@ -234,6 +234,66 @@
     }
     .install-block .cmd-block {
       border-color: color-mix(in srgb, var(--green) 30%, var(--border));
+    }
+
+    /* ── Compare (before/after) ── */
+    .compare {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .compare-col {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      padding: 14px 16px 14px;
+    }
+    .compare-col + .compare-col {
+      border-top: 1px solid var(--border);
+    }
+    .compare-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      color: var(--red);
+    }
+    .compare-label.is-after { color: var(--green); }
+    .compare-label .mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      line-height: 1;
+      background: color-mix(in srgb, currentColor 18%, transparent);
+    }
+    .compare .cmd-block {
+      border: none;
+      background: transparent;
+      border-radius: 0;
+      margin-bottom: 0;
+    }
+    .compare .cmd-row { padding: 0; }
+
+    @media (min-width: 900px) {
+      .compare { flex-direction: row; }
+      .compare-col { flex: 1; }
+      .compare-col + .compare-col {
+        border-top: none;
+        border-left: 1px solid var(--border);
+      }
+      .compare .cmd-row code { font-size: 0.78rem; }
     }
 
     /* ── Demo block ── */
@@ -418,22 +478,30 @@
       Buffers the full script, enforces strict mode, analyses for risks,
       and asks before running — without adding friction to your workflow.
     </p>
+  </div>
 
-    <p class="cmd-label" style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;">Before</p>
-    <div class="cmd-block" style="margin-bottom:8px;opacity:0.6">
-      <div class="cmd-row">
-        <code><span class="prompt">$ </span>curl -fsSL https://example.com/install.sh | bash</code>
+  <div class="container container-wide">
+    <div class="compare">
+      <div class="compare-col">
+        <p class="compare-label"><span class="mark" aria-hidden="true">✗</span>Before</p>
+        <div class="cmd-block">
+          <div class="cmd-row">
+            <code><span class="prompt">$ </span>curl -fsSL https://example.com/install.sh | bash</code>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <p class="compare-label is-after"><span class="mark" aria-hidden="true">✓</span>After</p>
+        <div class="cmd-block">
+          <div class="cmd-row">
+            <code><span class="prompt">$ </span>curl -fsSL https://example.com/install.sh | safesh</code>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <p class="cmd-label" style="font-family:var(--mono);font-size:0.75rem;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;">After</p>
-    <div class="cmd-block">
-      <div class="cmd-row">
-        <code><span class="prompt">$ </span>curl -fsSL https://example.com/install.sh | safesh</code>
-        <button class="copy-btn" onclick="copy(this, 'curl -fsSL https://example.com/install.sh | safesh')">Copy</button>
-      </div>
-    </div>
-
+  <div class="container">
     <div class="install-block">
       <div class="install-label">Install via go</div>
       <div class="cmd-block">
