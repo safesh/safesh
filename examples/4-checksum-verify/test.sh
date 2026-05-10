@@ -22,14 +22,14 @@ STATUS=$?
 echo "$OUTPUT"
 
 [ "$STATUS" -ne 0 ]                          && fail "expected exit 0, got $STATUS"
-echo "$OUTPUT" | grep -q "integrity verified" || fail "expected 'integrity verified' in output"
+echo "$OUTPUT" | grep -q "sha256 verified" || fail "expected 'sha256 verified' in output"
 echo "$OUTPUT" | grep -q "All checks passed"  || fail "expected script output 'All checks passed'"
 
 # Also verify that a wrong hash causes failure
 echo "Running: safesh --sha256 deadbeef (wrong hash)"
 BAD_OUTPUT=$(safesh --sha256 "deadbeefdeadbeef" --no-confirm "$SERVER_URL/install.sh" 2>&1) || true
 echo "$BAD_OUTPUT"
-echo "$BAD_OUTPUT" | grep -q "integrity check FAILED" || fail "expected integrity failure with wrong hash"
+echo "$BAD_OUTPUT" | grep -q "integrity check failed" || fail "expected integrity failure with wrong hash"
 
 [ "$FAIL" -eq 0 ] && echo "PASS" && exit 0
 exit 1
