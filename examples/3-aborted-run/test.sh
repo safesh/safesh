@@ -21,6 +21,10 @@ echo "$OUTPUT"
 [ "$STATUS" -eq 0 ] && fail "expected non-zero exit, got 0"
 echo "$OUTPUT" | grep -q "obfuscation"      || fail "expected [obfuscation] finding"
 echo "$OUTPUT" | grep -q "execution blocked" || fail "expected 'execution blocked' message"
+# Homograph hazards should also be surfaced (RTL override + Cyrillic-host URL)
+echo "$OUTPUT" | grep -q "homograph"  || fail "expected [homograph] finding"
+echo "$OUTPUT" | grep -q "U+202E"     || fail "expected RLO (U+202E) flag"
+echo "$OUTPUT" | grep -q "mixes scripts" || fail "expected mixed-script URL host flag"
 
 [ "$FAIL" -eq 0 ] && echo "PASS" && exit 0
 exit 1
