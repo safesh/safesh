@@ -73,6 +73,7 @@ safesh history show <id>
 | `network` | Outbound `curl`/`wget` calls and their domains |
 | `obfuscation` | `eval`, `base64 -d \| bash` chains |
 | `execution-chain` | Nested `curl \| bash` inside the script |
+| `homograph` | Bidi/zero-width characters and IDN-homograph URL hosts |
 
 ## Philosophy
 
