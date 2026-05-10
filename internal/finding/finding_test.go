@@ -19,8 +19,9 @@ func TestAllCategoriesComplete(t *testing.T) {
 		CategoryNetwork,
 		CategoryObfuscation,
 		CategoryExecutionChain,
+		CategoryHomograph,
 	} {
 		assert.True(t, seen[c], "AllCategories missing %s", c)
 	}
-	assert.Len(t, AllCategories, 7)
+	assert.Len(t, AllCategories, 8)
 }
