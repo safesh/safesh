@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>safesh — feature comparison</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <meta name="description" content="Side-by-side feature comparison of safesh against vet, Tirith, fbash + Falco, and raw bash.">
+  <meta name="description" content="Side-by-side feature comparison of safesh against vet, Tirith, and fbash + Falco.">
   <script>
     // Apply saved theme before paint to prevent flash
     (function() {
@@ -66,7 +66,7 @@
     a:hover { text-decoration: underline; }
 
     .container {
-      max-width: 980px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 0 24px;
     }
@@ -379,7 +379,6 @@
       <span class="logo">safe<span>sh</span></span>
     </a>
     <nav>
-      <a href="./">Home</a>
       <a href="checks.html">Checks</a>
       <a href="comparison.html" class="active">Comparison</a>
       <a href="https://github.com/safesh/safesh">GitHub</a>
@@ -435,11 +434,6 @@
         <p>Sysdig's runtime approach: wrap the install in a session leader and use eBPF rules
         (Falco) to flag/block writes outside install paths and other escape attempts.</p>
       </div>
-      <div class="tool-card">
-        <div class="name"><a href="https://www.gnu.org/software/bash/">raw bash</a></div>
-        <p>The baseline — what <code>curl … | bash</code> does today with no protection layer.
-        Included as a reference column, not because it's a competitor.</p>
-      </div>
     </div>
   </div>
 </section>
@@ -462,7 +456,6 @@
             <th><a href="https://github.com/vet-run/vet">vet</a></th>
             <th><a href="https://github.com/sheeki03/tirith">Tirith</a></th>
             <th><a href="https://www.sysdig.com/blog/friends-dont-let-friends-curl-bash">fbash + Falco</a></th>
-            <th><a href="https://www.gnu.org/software/bash/">raw bash</a></th>
           </tr>
         </thead>
         <tbody>
@@ -472,12 +465,10 @@
             <td class="cell yes">yes</td>
             <td class="cell yes">yes <span class="qual">(run cmd)</span></td>
             <td class="cell no">no</td>
-            <td class="cell no">no</td>
           </tr>
           <tr>
             <td class="cap">Strict-mode injection (<code>set -euo pipefail</code>)</td>
             <td class="cell yes">yes</td>
-            <td class="cell no">no</td>
             <td class="cell no">no</td>
             <td class="cell no">no</td>
             <td class="cell no">no</td>
@@ -488,7 +479,6 @@
             <td class="cell partial">via shellcheck</td>
             <td class="cell yes">yes <span class="qual">(~80 rules / 15 cats)</span></td>
             <td class="cell no">n/a <span class="qual">(runtime)</span></td>
-            <td class="cell no">no</td>
           </tr>
           <tr>
             <td class="cap">Diff against previous run</td>
@@ -496,12 +486,10 @@
             <td class="cell yes">yes</td>
             <td class="cell no">no</td>
             <td class="cell no">no</td>
-            <td class="cell no">no</td>
           </tr>
           <tr>
             <td class="cap">Env stripping to baseline</td>
             <td class="cell yes">yes</td>
-            <td class="cell no">no</td>
             <td class="cell no">no</td>
             <td class="cell no">no</td>
             <td class="cell no">no</td>
@@ -512,11 +500,9 @@
             <td class="cell no">no</td>
             <td class="cell no">no</td>
             <td class="cell no">no</td>
-            <td class="cell no">no</td>
           </tr>
           <tr>
             <td class="cap">Signature verification (Sigstore / GPG)</td>
-            <td class="cell no">no</td>
             <td class="cell no">no</td>
             <td class="cell no">no</td>
             <td class="cell no">no</td>
@@ -528,7 +514,6 @@
             <td class="cell partial">cache only</td>
             <td class="cell yes">logs</td>
             <td class="cell partial">via Falco</td>
-            <td class="cell no">no</td>
           </tr>
           <tr>
             <td class="cap">Network-target inventory</td>
@@ -536,14 +521,12 @@
             <td class="cell no">no</td>
             <td class="cell partial">partial</td>
             <td class="cell partial">runtime</td>
-            <td class="cell no">no</td>
           </tr>
           <tr>
             <td class="cap">ANSI / bidi / zero-width detection</td>
             <td class="cell yes">yes</td>
             <td class="cell no">no</td>
             <td class="cell yes">yes</td>
-            <td class="cell no">no</td>
             <td class="cell no">no</td>
           </tr>
           <tr>
@@ -552,7 +535,6 @@
             <td class="cell no">no</td>
             <td class="cell yes">yes</td>
             <td class="cell no">no</td>
-            <td class="cell no">no</td>
           </tr>
           <tr>
             <td class="cap">Sandboxed execution</td>
@@ -560,7 +542,6 @@
             <td class="cell no">no</td>
             <td class="cell no">no</td>
             <td class="cell yes">yes <span class="qual">(Linux)</span></td>
-            <td class="cell no">no</td>
           </tr>
           <tr>
             <td class="cap">Shell-hook / passive coverage</td>
@@ -568,14 +549,12 @@
             <td class="cell no">no</td>
             <td class="cell yes">yes</td>
             <td class="cell no">no</td>
-            <td class="cell no">n/a</td>
           </tr>
           <tr>
             <td class="cap">MCP / AI-agent integration</td>
             <td class="cell no">no</td>
             <td class="cell no">no</td>
             <td class="cell yes">yes</td>
-            <td class="cell no">no</td>
             <td class="cell no">no</td>
           </tr>
           <tr>
@@ -584,7 +563,6 @@
             <td class="cell no">no</td>
             <td class="cell yes">yes <span class="qual">(signed)</span></td>
             <td class="cell partial">via Falco</td>
-            <td class="cell no">no</td>
           </tr>
           <tr>
             <td class="cap">Cross-platform (macOS / Linux / WSL)</td>
@@ -592,14 +570,12 @@
             <td class="cell yes">yes</td>
             <td class="cell yes">yes</td>
             <td class="cell partial">Linux only</td>
-            <td class="cell yes">yes</td>
           </tr>
           <tr>
             <td class="cap">Dry-run</td>
             <td class="cell yes">yes</td>
             <td class="cell partial">partial</td>
             <td class="cell yes">yes <span class="qual">(check)</span></td>
-            <td class="cell no">no</td>
             <td class="cell no">no</td>
           </tr>
         </tbody>
