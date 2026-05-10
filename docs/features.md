@@ -66,6 +66,7 @@ Categories:
 | **network** | `curl`/`wget`/`fetch` calls within the script and the domains they contact |
 | **obfuscation** | `eval`, `base64 -d | bash`, dynamic variable construction used in command execution |
 | **execution-chain** | Nested `curl \| bash` or `wget \| sh` patterns inside the script |
+| **homograph** | Bidi/isolate control characters, zero-width characters, and IDN-homograph URL hosts (mixed-script or non-ASCII labels) |
 
 Example output:
 
@@ -173,7 +174,7 @@ This is static analysis — it identifies `curl`/`wget` calls with literal URLs.
 
 ### 11. Environment Isolation
 
-`safesh` runs the script with a clean, minimal environment rather than inheriting the full shell environment. The inherited environment is stripped to a safe baseline (PATH, HOME, USER, SHELL, TERM, LANG) before execution.
+`safesh` runs the script with a clean, minimal environment rather than inheriting the full shell environment. The inherited environment is stripped to a safe baseline (`PATH`, `HOME`, `USER`, `LOGNAME`, `SHELL`, `TERM`, `LANG`, `LC_ALL`) before execution.
 
 This prevents scripts from accidentally or intentionally reading sensitive values from environment variables (API keys, tokens, credentials) that happen to be set in the user's session.
 
@@ -185,6 +186,30 @@ safesh --env MY_VAR https://example.com/install.sh
 
 ---
 
+### 12. Sandboxed Execution (Linux)
+
+`safesh --sandbox` runs the script inside a [bubblewrap](https://github.com/containers/bubblewrap) sandbox with a restricted filesystem view. Network access is blocked by default; pass `--sandbox-allow-net` to allow it. Linux only; requires `bwrap` to be installed.
+
+This is opt-in and intended for high-risk scripts where the user wants stronger isolation than environment stripping alone provides. macOS support and a Landlock-only fallback on Linux kernels where bubblewrap is unavailable are still future work (see Future Considerations).
+
+---
+
+### 13. CI / Non-Interactive Mode
+
+`safesh --ci` skips the confirmation prompt, prints findings as warnings, and exits non-zero only on actual execution failure (not on findings alone). Intended for automated environments — CI pipelines, provisioning scripts, agent toolchains — where there is no human at a TTY to respond to prompts.
+
+The findings report is still produced and still written to history. `--ci` does not suppress findings; it only changes how they gate execution.
+
+---
+
+### 14. Runtime Observation (Linux)
+
+`safesh --observe` runs the script under [`strace`](https://strace.io/) and reports the observed behavior afterward — files opened, network calls made, processes spawned. Linux only; requires `strace` to be installed.
+
+This is a sandboxed run by default (no confirmation prompt), intended as a complement to static analysis rather than a replacement. It catches dynamically constructed behavior that the static `network` finding cannot resolve, but it does not block: the script runs and the observation is reported alongside the findings. Use `--dry-run` if you want analysis without execution.
+
+---
+
 ## Future Considerations
 
 The following are intentionally out of scope for MVP. They are worth revisiting once core features are stable.
@@ -192,17 +217,11 @@ The following are intentionally out of scope for MVP. They are worth revisiting 
 ### Plugin / Hook Architecture
 A defined extension API allowing custom analysis modules, custom blocking rules, and custom audit backends. Valuable for power users and teams, but expensive to design well. A poorly designed plugin API becomes a maintenance burden and a new attack surface. Should emerge from real use cases rather than speculative design.
 
-### Sandboxed Execution
-`safesh --sandbox` using bubblewrap or Linux namespaces to run the script with a restricted filesystem view and optional network blocking. Strong isolation for high-risk scripts. Significant implementation complexity and limited portability (requires Linux kernel 5.13+ for Landlock; bubblewrap not available on macOS).
-
-### Dynamic Dry Run
-Running the script in a sandbox and reporting what it *actually* did (files created, network calls made, processes spawned) rather than what a static analysis predicts. Far more accurate than static dry run but requires the sandbox infrastructure above.
+### macOS Sandbox + Landlock Fallback
+`--sandbox` is shipped on Linux via bubblewrap (see feature 12). Still future: a `sandbox-exec` profile for macOS, and a Landlock-only fallback on Linux kernels where bubblewrap is unavailable.
 
 ### Team / Organizational Policy
 Centrally managed `safesh` policy (allowed domains, required findings categories that block execution, mandatory audit log forwarding) for organizations that want consistent enforcement across developers. Out of scope until the single-user experience is solid.
 
 ### GPG / Sigstore Integration
 Verifying scripts against a GPG signature or Sigstore transparency log entry. Addresses the authentication gap that integrity checking (feature 7) does not. Requires bootstrapping trust in the verification tooling — a hard problem that deserves its own design treatment.
-
-### CI / Non-Interactive Mode
-`safesh --ci` that runs without prompts, treats all findings as warnings (not blocking), and exits non-zero only on execution failure. Useful for automated environments but needs careful design to avoid becoming a way to silently bypass the tool's protections.

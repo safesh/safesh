@@ -152,6 +152,7 @@ Modules are stateless and run in parallel. Results are merged and sorted by line
 | `network` | `CallExpr` where command is `curl`, `wget`, `fetch`, `http`; extracts literal URL arguments |
 | `obfuscation` | `CallExpr` for `eval`; pipe expressions where left side is `base64` with decode flags and right side is a shell |
 | `execution-chain` | Pipe expressions where the right-hand command is `bash`, `sh`, `zsh`, `dash`, `fish`, or `ksh` |
+| `homograph` | Bidi/isolate control characters (RLO, LRO, FSI, …), zero-width characters (ZWSP, ZWJ, ZWNJ, BOM), and URL hosts with non-ASCII or mixed-script labels (IDN homograph) |
 
 #### A note on static analysis limits
 
@@ -388,6 +389,10 @@ safesh history clean [flags]      # remove history entries matching criteria
 | `--env <VAR>` | Pass through a named environment variable (repeatable) |
 | `--no-strict` | Do not inject `set -euo pipefail` |
 | `--no-confirm` | Display findings but do not prompt; always proceed |
+| `--ci` | CI mode: skip prompt, print findings as warnings, exit non-zero only on execution failure |
+| `--sandbox` | Run script inside a bubblewrap sandbox (Linux only, requires `bwrap`) |
+| `--sandbox-allow-net` | Allow network access inside the sandbox (default: network is blocked) |
+| `--observe` | Run script under `strace` and report observed behavior (Linux only, requires `strace`) |
 | `--config <path>` | Use an alternate config file |
 | `--version` | Print version and exit |
 | `--help` | Print help and exit |
@@ -424,11 +429,12 @@ safesh/
 ├── internal/
 │   ├── analyzer/
 │   │   ├── analyzer.go           # orchestrates module execution
-│   │   ├── finding.go            # Finding type and Category constants
 │   │   └── modules/
 │   │       ├── destructive.go
 │   │       ├── execution_chain.go
 │   │       ├── execution_integrity.go
+│   │       ├── helpers.go
+│   │       ├── homograph.go
 │   │       ├── network.go
 │   │       ├── obfuscation.go
 │   │       ├── persistence.go
@@ -439,10 +445,17 @@ safesh/
 │   │   └── executor.go           # preamble injection, env setup, shell delegation
 │   ├── fetcher/
 │   │   └── fetcher.go            # stdin reader and HTTPS fetcher
+│   ├── finding/
+│   │   └── finding.go            # Finding type and Category constants (separate package to avoid import cycles with modules)
 │   ├── history/
 │   │   └── history.go            # write and read history entries
+│   ├── integration/              # end-to-end tests (build tag: integration)
 │   ├── integrity/
 │   │   └── integrity.go          # checksum discovery and verification
+│   ├── observer/
+│   │   └── observer.go           # strace-based runtime observation (--observe)
+│   ├── sandbox/
+│   │   └── sandbox.go            # bubblewrap sandbox wrapper (--sandbox)
 │   └── ui/
 │       ├── confirm.go            # TTY detection and confirmation prompt
 │       └── output.go             # findings display, formatting
@@ -464,7 +477,7 @@ safesh/
 |---|---|
 | `mvdan.cc/sh/v3` | Shell parser (AST) and syntax utilities. Powers all static analysis. |
 | `github.com/spf13/cobra` | CLI framework. Flag parsing, subcommands, help generation. |
-| `github.com/BurntSushi/toml` | Configuration file parsing. |
+| `github.com/pelletier/go-toml/v2` | Configuration file parsing. |
 | `golang.org/x/term` | TTY detection (determines whether to show interactive confirmation prompt). |
 
 All dependencies are chosen for stability and minimal transitive footprint. `mvdan.cc/sh/v3` is the only domain-specific dependency; the rest are standard CLI infrastructure.
