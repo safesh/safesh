@@ -237,67 +237,82 @@
       border-color: color-mix(in srgb, var(--green) 30%, var(--border));
     }
 
-    /* ── Compare (before/after) ── */
-    .compare-wrap {
-      background: var(--surface);
+    /* ── Diff (before/after) ── */
+    .diff-wrap {
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1;
     }
-    .compare {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-    .compare th,
-    .compare td {
-      padding: 12px 16px;
-      text-align: left;
-      vertical-align: middle;
-      width: 50%;
-    }
-    .compare thead th {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+    .diff-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       background: color-mix(in srgb, var(--border) 35%, var(--surface));
       border-bottom: 1px solid var(--border);
     }
-    .compare thead th.before { color: var(--red); }
-    .compare thead th.after  { color: var(--green); }
-    .compare thead th.before { border-right: 1px solid var(--border); }
-    .compare tbody td:first-child { border-right: 1px solid var(--border); }
-    .compare thead th .mark {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
+    .diff-header span {
+      padding: 8px 16px;
       font-size: 0.7rem;
-      margin-right: 8px;
-      background: color-mix(in srgb, currentColor 18%, transparent);
-      vertical-align: -2px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
-    .compare tbody code {
+    .diff-header .dh-del { color: var(--red); }
+    .diff-header .dh-add { color: var(--green); border-left: 1px solid var(--border); }
+    .diff-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .diff-line {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      gap: 10px;
+    }
+    .diff-del {
+      background: color-mix(in srgb, var(--red) 10%, var(--surface));
+      border-right: 1px solid var(--border);
+    }
+    .diff-add {
+      background: color-mix(in srgb, var(--green) 10%, var(--surface));
+    }
+    .diff-sign {
+      flex-shrink: 0;
+      font-weight: 700;
+      user-select: none;
+    }
+    .diff-del .diff-sign { color: var(--red); }
+    .diff-add .diff-sign { color: var(--green); }
+    .diff-line code {
       font-family: var(--mono);
-      font-size: 0.72rem;
+      font-size: 0.82rem;
       color: var(--text);
       white-space: nowrap;
       overflow-x: auto;
-      display: block;
     }
-    .compare tbody code .prompt { color: var(--muted); user-select: none; }
+    .diff-line code .prompt { color: var(--muted); user-select: none; }
+    .diff-line code .diff-highlight {
+      border-radius: 3px;
+      padding: 1px 2px;
+      margin: 0 -2px;
+    }
+    .diff-del code .diff-highlight {
+      background: color-mix(in srgb, var(--red) 25%, transparent);
+      color: var(--red);
+      font-weight: 600;
+    }
+    .diff-add code .diff-highlight {
+      background: color-mix(in srgb, var(--green) 25%, transparent);
+      color: var(--green);
+      font-weight: 600;
+    }
 
     @media (max-width: 640px) {
-      .compare, .compare thead, .compare tbody, .compare tr { display: block; }
-      .compare th, .compare td { display: block; width: auto; }
-      .compare thead th.before { border-right: none; }
-      .compare tbody td:first-child {
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-      }
+      .diff-header, .diff-body { grid-template-columns: 1fr; }
+      .diff-header .dh-add { border-left: none; border-top: 1px solid var(--border); }
+      .diff-del { border-right: none; border-bottom: 1px solid var(--border); }
     }
 
     /* ── Demo block ── */
@@ -488,21 +503,21 @@
   </div>
 
   <div class="container">
-    <div class="compare-wrap">
-      <table class="compare">
-        <thead>
-          <tr>
-            <th class="before"><span class="mark" aria-hidden="true">✗</span>Before</th>
-            <th class="after"><span class="mark" aria-hidden="true">✓</span>After</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code><span class="prompt">$ </span>curl -fsSL https://example.com/install.sh | bash</code></td>
-            <td><code><span class="prompt">$ </span>curl -fsSL https://example.com/install.sh | safesh</code></td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="diff-wrap">
+      <div class="diff-header">
+        <span class="dh-del">- Before</span>
+        <span class="dh-add">+ After</span>
+      </div>
+      <div class="diff-body">
+        <div class="diff-line diff-del">
+          <span class="diff-sign" aria-hidden="true">-</span>
+          <code><span class="prompt">$ </span>curl -fsSL https://example.com/install.sh | <span class="diff-highlight">bash</span></code>
+        </div>
+        <div class="diff-line diff-add">
+          <span class="diff-sign" aria-hidden="true">+</span>
+          <code><span class="prompt">$ </span>curl -fsSL https://example.com/install.sh | <span class="diff-highlight">safesh</span></code>
+        </div>
+      </div>
     </div>
   </div>
 
