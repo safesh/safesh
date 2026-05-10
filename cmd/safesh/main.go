@@ -62,6 +62,7 @@ Usage:
   curl -fsSL https://example.com/install.sh | safesh bash
   safesh https://example.com/install.sh
   safesh --dry-run https://example.com/install.sh`,
+		Version:       fmt.Sprintf("%s (commit %s, built %s)", version, commit, date),
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.MaximumNArgs(1),
@@ -69,6 +70,7 @@ Usage:
 			return runMain(cmd, args, f)
 		},
 	}
+	root.SetVersionTemplate("safesh {{.Version}}\n")
 
 	root.PersistentFlags().BoolVar(&f.dryRun, "dry-run", false, "analyse without executing")
 	root.PersistentFlags().BoolVar(&f.observe, "observe", false, "run script under strace and report observed behaviour (Linux only, requires strace)")
