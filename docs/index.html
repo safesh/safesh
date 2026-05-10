@@ -205,6 +205,37 @@
       margin: 4px 0;
     }
 
+    /* ── Install block ── */
+    .install-block {
+      margin-top: 36px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+    }
+    .install-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+    .install-label::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+    .install-block .cmd-block {
+      border-color: color-mix(in srgb, var(--green) 30%, var(--border));
+    }
+
     /* ── Demo block ── */
     .demo {
       padding: 64px 0;
@@ -403,11 +434,13 @@
       </div>
     </div>
 
-    <p style="margin-top:24px;font-size:0.875rem;color:var(--muted)">Install via go:</p>
-    <div class="cmd-block" style="margin-top:8px">
-      <div class="cmd-row">
-        <code><span class="prompt">$ </span>go install github.com/safesh/safesh/cmd/safesh@latest</code>
-        <button class="copy-btn" onclick="copy(this, 'go install github.com/safesh/safesh/cmd/safesh@latest')">Copy</button>
+    <div class="install-block">
+      <div class="install-label">Install via go</div>
+      <div class="cmd-block">
+        <div class="cmd-row">
+          <code><span class="prompt">$ </span>go install github.com/safesh/safesh/cmd/safesh@latest</code>
+          <button class="copy-btn" onclick="copy(this, 'go install github.com/safesh/safesh/cmd/safesh@latest')">Copy</button>
+        </div>
       </div>
     </div>
   </div>
