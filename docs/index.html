@@ -455,6 +455,7 @@
       <span class="logo">safe<span>sh</span></span>
     </a>
     <nav>
+      <a href="checks.html">Checks</a>
       <a href="https://github.com/safesh/safesh">GitHub</a>
       <a href="https://github.com/safesh/safesh/releases">Releases</a>
       <a href="https://github.com/safesh/safesh/issues">Issues</a>
@@ -592,7 +593,7 @@
 <section class="findings">
   <div class="container">
     <h2>Finding categories</h2>
-    <p class="sub">All findings are reported with line numbers before you decide whether to proceed.</p>
+    <p class="sub">All findings are reported with line numbers before you decide whether to proceed. <a href="checks.html">See the full reference →</a></p>
     <table>
       <thead>
         <tr>
@@ -628,6 +629,10 @@
         <tr>
           <td><code>execution-chain</code></td>
           <td>Nested <code style="font-family:var(--mono);font-size:0.8em;color:var(--text)">curl | bash</code> inside the script</td>
+        </tr>
+        <tr>
+          <td><code>homograph</code></td>
+          <td>Bidi/zero-width characters and IDN-homograph URL hosts</td>
         </tr>
       </tbody>
     </table>
